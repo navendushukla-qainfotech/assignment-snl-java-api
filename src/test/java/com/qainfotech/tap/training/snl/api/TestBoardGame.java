@@ -181,6 +181,52 @@ public class TestBoardGame {
 		}
 		
 	}
+	/**Still working on this!! At time when player reaches 97 and dice value comes more than 3 game terminates*/
+	@Test
+	public void Test_full_game_progress() throws FileNotFoundException, UnsupportedEncodingException, IOException,
+			PlayerExistsException, GameInProgressException, MaxPlayersReachedExeption, InvalidTurnException {
+        System.out.println("\n\n\nTest for full game in progress");
+		Board board1 = new Board();
+		int position = 0;
+		int type = 0;
+		int turn = 0;
+		board1.registerPlayer("sourav");
+		board1.registerPlayer("gorav");
+		int length = board1.data.getJSONArray("players").length();
+		while (position < 100) {
+			JSONObject student = ((JSONObject) board1.data.getJSONArray("players").get(turn));
+			UUID uuid = UUID
+					.fromString(((JSONObject) board1.data.getJSONArray("players").get(turn)).get("uuid").toString());
+			position = ((JSONObject) board1.data.getJSONArray("players").get(turn)).getInt("position");
+			System.out.println("Initial position before rolling dice " + position);
+			JSONObject response = board1.rollDice(uuid);
+			int dice = response.getInt("dice");
+			System.out.println("Value on dice "+dice);
+			position = position + dice;
+			if (position <= 100)
+				type = ((JSONObject) board1.data.getJSONArray("steps").get(position)).getInt("type");
+			if (type == 0 && position <= 100) {
+				assertThat(student.getInt("position")).isEqualTo(position);                
+			System.out.println("position of player after rooling dice "+position);
+			} 
+			
+			else if (type == 1 && position <= 100) {
+				position = ((JSONObject) board1.data.getJSONArray("steps").get(position)).getInt("target");
+				assertThat(student.getInt("position")).isEqualTo(position);
+				System.out.println("position of player after rooling dice "+position);
+				// assertThat(actual)
+				} else if (type == 2 && position <= 100)
+				{				
+				position = ((JSONObject) board1.data.getJSONArray("steps").get(position)).getInt("target");
+				assertThat(student.getInt("position")).isEqualTo(position);
+				System.out.println("position of player after rooling dice "+position);
+				}			if (turn == length - 1)
+					turn = 0;
+				else				
+				turn = turn + 1;
+		}
+
+}
 	
 //	@Test
 //	public void test_position_95_96_97_98_99() throws FileNotFoundException, UnsupportedEncodingException, InvalidTurnException{
