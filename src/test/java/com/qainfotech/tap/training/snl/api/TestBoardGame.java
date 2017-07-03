@@ -1,12 +1,14 @@
 package com.qainfotech.tap.training.snl.api;
 
 import org.testng.annotations.Test;
+
 import java.io.FileNotFoundException;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
+import org.assertj.core.api.Assert;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +17,8 @@ import org.testng.Assert.*;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import static org.assertj.core.api.Assertions.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 
 public class TestBoardGame {
 
@@ -29,17 +33,16 @@ public class TestBoardGame {
 	public void loadDB() throws FileNotFoundException, UnsupportedEncodingException, IOException, PlayerExistsException,
 			GameInProgressException, MaxPlayersReachedExeption {
 		boardReader = new Board();
-		// uuid = boardReader.getUUID();
-		// boardReader = new Board(uuid);
+		uuid = boardReader.getUUID();
+		boardReader = new Board(uuid);
 		boardReader.registerPlayer("Navendu");
 		boardReader.registerPlayer("Max");
 	}
 
-	@Test(priority = 1)
-	public void test_new_player_entry() throws FileNotFoundException, UnsupportedEncodingException,
+	@Test
+	public void a_test_new_player_entry() throws FileNotFoundException, UnsupportedEncodingException,
 			PlayerExistsException, GameInProgressException, MaxPlayersReachedExeption, IOException {
 
-		boardReader = new Board();
 		boardReader.registerPlayer("Nachiketa");
 	}
 
@@ -110,29 +113,91 @@ public class TestBoardGame {
 		boardReader.rollDice(uuid1);
 
 	}
-	
+
+
 	@Test
-	public void test(){
+	public void test_Dice_value_should_not_be_more_than_six()
+			throws FileNotFoundException, UnsupportedEncodingException, IOException, InvalidTurnException,
+			PlayerExistsException, GameInProgressException, MaxPlayersReachedExeption {
 		
-		
-		
+		Integer dice;
+		UUID uuid1 = (UUID) ((JSONObject) boardReader.data.getJSONArray("players").get(0)).get("uuid");
+
+		dice = boardReader.rollDice(uuid1).getInt("dice");
+		System.out.println(dice);
+		assertThat(dice>0);
+		assertThat(dice < 7);
+
 	}
 
+
 	
+	@Test
+	public void test_position_of_players() throws InvalidTurnException, IOException, PlayerExistsException, GameInProgressException, MaxPlayersReachedExeption{
+		Board boardReader= new Board();
+		boardReader.registerPlayer("a");
+		boardReader.registerPlayer("b");
+		boardReader.registerPlayer("c");
+		boardReader.registerPlayer("d");
+		for(int index=0;index<boardReader.data.getJSONArray("players").length();index++)
+		{
+		UUID uuid1 = (UUID) ((JSONObject) boardReader.data.getJSONArray("players").get(index)).get("uuid");
+		Object current_position = ((JSONObject) boardReader.getData().getJSONArray("players").get(index)).get("position");
+		int currentpos=(int)current_position;
+		System.out.println("The current position for "+index+" is :"+currentpos);
+		Object new_position;
+		int newpos=currentpos;
+		Integer dice=boardReader.rollDice(uuid1).getInt("dice");
+		System.out.println("The dice value "+index+ "is"+dice);
+//		Integer dice= boardReader.rollDice(uuid1).getInt("dice");
+//		System.out.println(dice);
+		JSONObject steps= ((JSONObject) boardReader.data.getJSONArray("steps").get(index));
+		int type = (Integer) steps.get("type");
+		System.out.println("the type for "+index+" is :"+type);
+		if(type==2)
+		{
+			new_position = ((JSONObject) boardReader.getData().getJSONArray("players").get(index)).get("position");	
+			newpos= (int) new_position;
+			System.out.println("new position for"+index+"is"+newpos);
+			assertThat(newpos>currentpos);
+		}
+		else if(type==1){
+			new_position = ((JSONObject) boardReader.getData().getJSONArray("players").get(index)).get("position");	
+			newpos= (int) new_position;
+			System.out.println("new position for"+index+"is"+newpos);
+			assertThat(newpos<currentpos);
+			
+			
+		}
+		else{
+			new_position = ((JSONObject) boardReader.getData().getJSONArray("players").get(index)).get("position");
+			int newcheck= (int)new_position;
+			System.out.println("new position for "+index+ "is"+newcheck);
+			newpos=currentpos+dice;
+			assertThat(newcheck==newpos);
+			
+		}
+		
+		}
+		
+	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+//	@Test
+//	public void test_position_95_96_97_98_99() throws FileNotFoundException, UnsupportedEncodingException, InvalidTurnException{
+//		
+//		
+//		
+//		for(int index=0;index<4;index++)
+//		{
+//			UUID uuid1 = (UUID) ((JSONObject) boardReader.data.getJSONArray("players").get(index)).get("uuid"); 
+//			boardReader.rollDice(uuid1);
+//			Object current_position = ((JSONObject) boardReader.getData().getJSONArray("players").get(index)).get("position");
+//			int current_position_int= (int)current_position;
+//			if(current_position_int==95)
+//			{
+//				
+//			}
+//		}
+//		
+//	}
 }
-
-
-
-
-
-
